@@ -17,6 +17,7 @@
 /.next/
 /.next.old/
 /out/
+/dist/
 
 # production
 /build
