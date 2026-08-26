@@ -198,6 +198,20 @@ export default function Main() {
           </a>{' '}
           · MIT License
         </p>
+        <nav className='flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-zinc-400 mt-3'>
+          <Link href='/' className='hover:text-[#6E56CF] transition-colors'>
+            {t('nav.home')}
+          </Link>
+          <Link href='/editor' className='hover:text-[#6E56CF] transition-colors'>
+            {t('nav.editor')}
+          </Link>
+          <Link href='/privacy' className='hover:text-[#6E56CF] transition-colors'>
+            {t('nav.privacy')}
+          </Link>
+          <Link href='/about' className='hover:text-[#6E56CF] transition-colors'>
+            {t('nav.about')}
+          </Link>
+        </nav>
       </footer>
     </div>
   )

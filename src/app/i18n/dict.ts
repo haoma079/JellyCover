@@ -6,6 +6,10 @@ export const zh: Dict = {
   // 顶栏 / 打赏弹窗
   'nav.supportAuthor': '支持作者',
   'nav.logoAlt': '水母封面',
+  'nav.home': '首页',
+  'nav.editor': '编辑器',
+  'nav.privacy': '隐私政策',
+  'nav.about': '关于',
   'donate.title': '喜欢水母封面？',
   'donate.desc': '水母封面完全免费使用，但服务器和 CDN 会带来一定的运营成本。如果你觉得它有帮助，欢迎打赏支持作者。',
   'donate.blog': '作者博客：顺风网舟 →',
@@ -162,6 +166,10 @@ export const zh: Dict = {
 export const en: Dict = {
   'nav.supportAuthor': 'Support',
   'nav.logoAlt': 'JellyCover',
+  'nav.home': 'Home',
+  'nav.editor': 'Editor',
+  'nav.privacy': 'Privacy Policy',
+  'nav.about': 'About',
   'donate.title': 'Enjoy JellyCover?',
   'donate.desc':
     'JellyCover is free to use, but servers and CDN incur some operating costs. If it helps you, a tip keeps it running.',
