@@ -62,6 +62,9 @@ export const metadata: Metadata = {
     shortcut: '/logo.svg',
     apple: [{ url: '/favicon-180-precomposed.png', sizes: '180x180', type: 'image/png' }],
   },
+  verification: {
+    google: 'lpFEuSwQHTcEzUBWXGR-5mS6arWA8gB2UTA937icIjQ',
+  },
 }
 
 export const viewport: Viewport = {
