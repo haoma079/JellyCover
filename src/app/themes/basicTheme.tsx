@@ -27,6 +27,7 @@ const BasicTheme: React.FC<ThemeProps> = ({ config }) => {
           style={titleStyle}
           fontFamily={font.fontFamily}
           className='text-5xl'
+          autoFit
         />
         <div className='w-full flex justify-center items-center gap-4'>
           {showIcon && (

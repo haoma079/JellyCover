@@ -84,13 +84,14 @@ export const buildWrapperStyle = (style: TextStyle): React.CSSProperties => {
 }
 
 // 根据 TextStyle 生成内层文字样式（字体、颜色、背景只包裹文字）
-export const buildTextStyle = (style: TextStyle, fontFamily?: string): React.CSSProperties => {
+export const buildTextStyle = (style: TextStyle, fontFamily?: string, fontSize?: number | string): React.CSSProperties => {
   return {
     fontWeight: style.bold ? 'bold' : 'normal',
     fontStyle: style.italic ? 'italic' : 'normal',
     color: style.color || undefined,
     backgroundColor: style.backgroundColor || undefined,
     lineHeight: style.lineHeight,
+    fontSize,
     textShadow:
       style.strokeWidth > 0 && style.strokeColor
         ? buildStrokeShadow(style.strokeColor, style.strokeWidth)

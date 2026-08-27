@@ -38,6 +38,7 @@ const ModernTheme: React.FC<ThemeProps> = ({ config }) => {
             style={titleStyle}
             fontFamily={font.fontFamily}
             className='text-5xl'
+            autoFit
           />
           <TextLayer
             field='subtitle'

@@ -88,6 +88,7 @@ const BackgroundTheme: React.FC<ThemeProps> = ({ config }) => {
             style={titleStyle}
             fontFamily={font.fontFamily}
             className='text-5xl font-bold text-shadow-lg text-shadow-black'
+            autoFit
           />
           <TextLayer
             field='subtitle'

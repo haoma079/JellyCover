@@ -38,8 +38,9 @@ const PreviewTheme: React.FC<ThemeProps> = ({ config }) => {
           html={title}
           style={titleStyle}
           fontFamily={font.fontFamily}
-          className='text-5xl font-bold text-white text-shadow-lg text-shadow-black'
-        />
+            className='text-5xl font-bold text-white text-shadow-lg text-shadow-black'
+            autoFit
+          />
 
         <div className='w-full aspect-[1.5382] group flex flex-col relative'>
           <img src={pcBg.src} className='absolute top-0 left-0 w-full z-10' alt='background' />

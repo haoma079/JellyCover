@@ -56,6 +56,7 @@ const StylishTheme: React.FC<ThemeProps> = ({ config }) => {
           style={titleStyle}
           fontFamily={font.fontFamily}
           className='text-5xl'
+          autoFit
         />
         <div className='flex items-center gap-4'>
           {showIcon && (
