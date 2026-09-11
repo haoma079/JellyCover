@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { LoaderCircle, Download, Copy, ArrowRightLeft, ImageUpscale } from 'lucide-react'
@@ -17,9 +17,11 @@ const EditorToImg: React.FC<EditorToImgProps> = (props) => {
   const [copyLoading, setCopyLoading] = useState<boolean>(false)
   const [showAlert, setShowAlert] = useState(false)
   const [alertData, setAlertData] = useState<CenterAlertOptions>()
+  const [scale, setScale] = useState(1)
   const { coverSetting, setCoverSetting } = useContext(CoverContext)
   const t = useT()
-  const componentRef = React.createRef<HTMLDivElement>()
+  const hiddenRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const showNotification = (data: React.SetStateAction<CenterAlertOptions | undefined>) => {
     setAlertData(data)
@@ -29,6 +31,41 @@ const EditorToImg: React.FC<EditorToImgProps> = (props) => {
   const handleClose = () => {
     setShowAlert(false)
   }
+
+  // 根据容器空间自动缩放预览封面，保证不同比例（尤其是竖屏 3:4/9:16）都能完整显示
+  useEffect(() => {
+    const measure = () => {
+      const container = containerRef.current
+      const hidden = hiddenRef.current
+      if (!container || !hidden) return
+      const containerRect = container.getBoundingClientRect()
+      const hiddenRect = hidden.getBoundingClientRect()
+      if (!containerRect.width || !containerRect.height || !hiddenRect.width || !hiddenRect.height) return
+
+      const newScale = Math.min(
+        containerRect.width / hiddenRect.width,
+        containerRect.height / hiddenRect.height,
+        1 // 不放大超过原始尺寸
+      )
+      setScale(Number(newScale.toFixed(4)))
+    }
+
+    measure()
+
+    let ro: ResizeObserver | null = null
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      ro = new ResizeObserver(measure)
+      ro.observe(containerRef.current)
+    }
+
+    const handleResize = () => measure()
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      if (ro) ro.disconnect()
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [coverSetting.size.value, coverSetting.theme.value])
 
   async function saveImage(data: string): Promise<void> {
     const a = document.createElement('a') as HTMLAnchorElement
@@ -43,8 +80,8 @@ const EditorToImg: React.FC<EditorToImgProps> = (props) => {
   const downloadImage = async (): Promise<void> => {
     setLoading(true)
 
-    if (componentRef.current) {
-      const data = await getData(componentRef.current)
+    if (hiddenRef.current) {
+      const data = await getData(hiddenRef.current)
       await saveImage(data)
 
       // 如果使用了unsplash图片，追踪下载
@@ -65,8 +102,8 @@ const EditorToImg: React.FC<EditorToImgProps> = (props) => {
   const copyImage = async (): Promise<void> => {
     setCopyLoading(true)
 
-    if (componentRef.current) {
-      const data = await getData(componentRef.current)
+    if (hiddenRef.current) {
+      const data = await getData(hiddenRef.current)
       await copyImageToClipboard(data)
     }
 
@@ -136,8 +173,9 @@ const EditorToImg: React.FC<EditorToImgProps> = (props) => {
 
   return (
     <React.Fragment>
-      <div className='relative'>
-        <div className='2xl:absolute 2xl:top-0 2xl:left-full px-4 pb-4 flex 2xl:flex-col gap-2'>
+      <div className='relative flex flex-col h-full w-full overflow-hidden bg-gray-50'>
+        {/* 操作按钮：固定在预览区顶部，不再随封面比例变化被挤出 */}
+        <div className='shrink-0 flex items-center justify-end gap-2 px-4 py-3 border-b border-zinc-200 bg-white'>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -206,9 +244,20 @@ const EditorToImg: React.FC<EditorToImgProps> = (props) => {
             </TooltipProvider>
           )}
         </div>
-        <div ref={componentRef}>{props.children}</div>
-        {showAlert && <CenteredAlert type={alertData?.type} title={alertData?.title} message={alertData?.message} onClose={handleClose} />}
+
+        {/* 预览区：根据容器尺寸自动缩放封面，保证完整可见 */}
+        <div ref={containerRef} className='flex-1 min-h-0 relative flex items-center justify-center p-4 overflow-hidden'>
+          {/* 隐藏原始尺寸封面，用于 html2canvas 截图 */}
+          <div ref={hiddenRef} className='absolute -left-[9999px] -top-[9999px]'>
+            {props.children}
+          </div>
+          {/* 可见的自适应缩放封面 */}
+          <div style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
+            {props.children}
+          </div>
+        </div>
       </div>
+      {showAlert && <CenteredAlert type={alertData?.type} title={alertData?.title} message={alertData?.message} onClose={handleClose} />}
     </React.Fragment>
   )
 }

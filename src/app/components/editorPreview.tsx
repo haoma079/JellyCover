@@ -9,7 +9,7 @@ const EditorPreview = () => {
   return (
     <div className='h-full w-full bg-gray-50 flex flex-col overflow-hidden'>
       <h2 className='text-lg font-bold text-center py-4 shrink-0'>{t('editor.previewTitle')}</h2>
-      <div className='flex-1 w-full min-h-0 overflow-auto flex justify-center items-center p-4'>
+      <div className='flex-1 w-full min-h-0 overflow-hidden'>
         <EditorToImg>
           <EditorImage />
         </EditorToImg>
