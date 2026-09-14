@@ -20,7 +20,7 @@ const EditorToImg: React.FC<EditorToImgProps> = (props) => {
   const [scale, setScale] = useState(1)
   const { coverSetting, setCoverSetting } = useContext(CoverContext)
   const t = useT()
-  const hiddenRef = useRef<HTMLDivElement>(null)
+  const previewRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const showNotification = (data: React.SetStateAction<CenterAlertOptions | undefined>) => {
@@ -36,15 +36,17 @@ const EditorToImg: React.FC<EditorToImgProps> = (props) => {
   useEffect(() => {
     const measure = () => {
       const container = containerRef.current
-      const hidden = hiddenRef.current
-      if (!container || !hidden) return
+      const preview = previewRef.current
+      if (!container || !preview) return
       const containerRect = container.getBoundingClientRect()
-      const hiddenRect = hidden.getBoundingClientRect()
-      if (!containerRect.width || !containerRect.height || !hiddenRect.width || !hiddenRect.height) return
+      // transform: scale 不影响 offsetWidth/offsetHeight，这里取原始尺寸计算缩放比
+      const originalWidth = preview.offsetWidth
+      const originalHeight = preview.offsetHeight
+      if (!containerRect.width || !containerRect.height || !originalWidth || !originalHeight) return
 
       const newScale = Math.min(
-        containerRect.width / hiddenRect.width,
-        containerRect.height / hiddenRect.height,
+        containerRect.width / originalWidth,
+        containerRect.height / originalHeight,
         1 // 不放大超过原始尺寸
       )
       setScale(Number(newScale.toFixed(4)))
@@ -80,8 +82,8 @@ const EditorToImg: React.FC<EditorToImgProps> = (props) => {
   const downloadImage = async (): Promise<void> => {
     setLoading(true)
 
-    if (hiddenRef.current) {
-      const data = await getData(hiddenRef.current)
+    if (previewRef.current) {
+      const data = await getData(previewRef.current)
       await saveImage(data)
 
       // 如果使用了unsplash图片，追踪下载
@@ -102,8 +104,8 @@ const EditorToImg: React.FC<EditorToImgProps> = (props) => {
   const copyImage = async (): Promise<void> => {
     setCopyLoading(true)
 
-    if (hiddenRef.current) {
-      const data = await getData(hiddenRef.current)
+    if (previewRef.current) {
+      const data = await getData(previewRef.current)
       await copyImageToClipboard(data)
     }
 
@@ -130,6 +132,11 @@ const EditorToImg: React.FC<EditorToImgProps> = (props) => {
       foreignObjectRendering: false,
       ignoreElements: (element) => {
         return element.classList.contains('ignore')
+      },
+      // 截图时移除预览缩放，保证导出为原始清晰度
+      onclone: (_doc, clonedElement) => {
+        clonedElement.style.transform = 'none'
+        clonedElement.style.transformOrigin = ''
       }
     }
 
@@ -247,12 +254,7 @@ const EditorToImg: React.FC<EditorToImgProps> = (props) => {
 
         {/* 预览区：根据容器尺寸自动缩放封面，保证完整可见 */}
         <div ref={containerRef} className='flex-1 min-h-0 relative flex items-center justify-center p-4 overflow-hidden'>
-          {/* 隐藏原始尺寸封面，用于 html2canvas 截图 */}
-          <div ref={hiddenRef} className='absolute -left-[9999px] -top-[9999px]'>
-            {props.children}
-          </div>
-          {/* 可见的自适应缩放封面 */}
-          <div style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
+          <div ref={previewRef} className='preview-scale-wrapper' style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
             {props.children}
           </div>
         </div>
