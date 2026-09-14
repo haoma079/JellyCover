@@ -52,9 +52,12 @@ const TextLayer = ({ field, html, style, fontFamily, className, autoFit = false 
       document.body.removeChild(probe)
 
       if (natural > 0 && natural > available) {
-        setFitFontPx(baseFont * (available / natural))
+        // 留 1% 余量，避免 subpixel 误差导致在边界反复缩放
+        setFitFontPx(baseFont * (available / natural) * 0.99)
       } else {
-        setFitFontPx(undefined)
+        // 已能在单行内容纳：保持当前缩放值，避免重置为 undefined 导致
+        // 字号在「原始大小 / 缩放大小」之间反复跳变（闪动）
+        setFitFontPx((prev) => (prev === undefined ? baseFont : prev))
       }
     }
 
@@ -68,10 +71,10 @@ const TextLayer = ({ field, html, style, fontFamily, className, autoFit = false 
       })
     }
 
-    // 容器尺寸变化（换尺寸/改 padding）时重新测量
+    // 容器尺寸变化（换尺寸/改 padding）时重新测量；只监听父容器，
+    // 监听文字自身会在每次字号变化时触发测量从而加剧抖动
     const ro = new ResizeObserver(() => measure())
     if (wrap.parentElement) ro.observe(wrap.parentElement)
-    ro.observe(wrap)
 
     return () => {
       cancelled = true
